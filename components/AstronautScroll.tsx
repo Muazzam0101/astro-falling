@@ -15,6 +15,8 @@ export default function AstronautScroll() {
   const cardRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const currentFrameRef = useRef(0);
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -117,38 +119,68 @@ export default function AstronautScroll() {
 
   useEffect(() => {
     function onScroll() {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        const section = sectionRef.current;
-        const card = cardRef.current;
-        if (!section || !card) return;
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const sectionHeight = section.offsetHeight - window.innerHeight;
+      const scrolled = -rect.top;
+      // Map raw scroll to a target progress from 0 to 1
+      targetProgressRef.current = Math.max(0, Math.min(1, Math.max(0, scrolled) / sectionHeight));
+    }
 
-        const rect = section.getBoundingClientRect();
-        const sectionHeight = section.offsetHeight - window.innerHeight;
-        const scrolled = -rect.top;
-        const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
 
-        const frameIndex = Math.min(Math.floor(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1);
+    let lastTime = performance.now();
+    function renderLoop(time: number) {
+      const dt = Math.min((time - lastTime) / 1000, 0.1);
+      lastTime = time;
+
+      const diff = targetProgressRef.current - currentProgressRef.current;
+      
+      // Interpolate for smooth, decoupled scroll progress (lerp)
+      if (Math.abs(diff) > 0.0001) {
+        // Adjust the lerp factor to control the "lag" / slowness of following the scroll
+        const lerpFactor = 4.5 * dt; 
+        currentProgressRef.current += diff * lerpFactor;
+        
+        // Clamp to prevent floating point overshoot
+        let p = currentProgressRef.current;
+        if (p < 0) p = 0;
+        if (p > 1) p = 1;
+        
+        // Apply quadratic easing to create slight resistance at start and end
+        const easedP = Math.max(0, Math.min(1, easeInOutQuad(p)));
+
+        const frameIndex = Math.min(
+          Math.floor(easedP * (TOTAL_FRAMES - 1)), 
+          TOTAL_FRAMES - 1
+        );
+
         if (frameIndex !== currentFrameRef.current) {
           currentFrameRef.current = frameIndex;
           drawFrame(frameIndex);
         }
 
-        const eased = easeInOutCubic(progress);
-        const scale = 0.45 + eased * 0.55;
-        const borderWidth = Math.max(0, 8 * (1 - eased));
-        const shadowSize = Math.max(0, 12 * (1 - eased));
+        const card = cardRef.current;
+        if (card) {
+          const scale = 0.45 + easedP * 0.55;
+          const borderWidth = Math.max(0, 8 * (1 - easedP));
+          const shadowSize = Math.max(0, 12 * (1 - easedP));
 
-        card.style.transform = `scale(${scale})`;
-        card.style.borderWidth = `${borderWidth}px`;
-        card.style.boxShadow = shadowSize > 0
-          ? `${shadowSize}px ${shadowSize}px 0px 0px #FF5E00`
-          : "none";
-      });
+          card.style.transform = `scale(${scale})`;
+          card.style.borderWidth = `${borderWidth}px`;
+          card.style.boxShadow = shadowSize > 0
+            ? `${shadowSize}px ${shadowSize}px 0px 0px #FF5E00`
+            : "none";
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(renderLoop);
     }
+    
+    rafRef.current = requestAnimationFrame(renderLoop);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -164,7 +196,7 @@ export default function AstronautScroll() {
       ref={sectionRef}
       id="astronaut-scroll"
       className="relative bg-black border-b-8 border-black"
-      style={{ height: "500vh" }}
+      style={{ height: "1500vh" }}
     >
       {/* Section title sticker */}
       <div className="absolute top-8 left-8 z-20 bg-[#FF5E00] text-black px-6 py-3 border-4 border-black font-black text-xl uppercase -rotate-2 neo-shadow">
@@ -216,4 +248,8 @@ export default function AstronautScroll() {
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
