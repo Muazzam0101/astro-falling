@@ -3,98 +3,94 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-const features = [
-  {
-    icon: "⚛️",
-    title: "Nano-Engineered",
-    description:
-      "Each molecule is precisely calibrated for maximum absorption. Our proprietary nano-tech ensures every sip delivers cosmic-level nutrition.",
-  },
-  {
-    icon: "🌌",
-    title: "Space-Grade Quality",
-    description:
-      "Tested in zero-gravity environments and approved by interstellar nutritionists. The same formula trusted by astronauts on deep space missions.",
-  },
-  {
-    icon: "⚡",
-    title: "Instant Hydration",
-    description:
-      "Nano-particles penetrate cells 10x faster than conventional beverages. Feel the cosmic energy surge within nanoseconds.",
-  },
-  {
-    icon: "🧬",
-    title: "Bio-Adaptive Formula",
-    description:
-      "Our AI-driven molecular structure adapts to your body's unique hydration needs. Personalized nutrition, at the quantum level.",
-  },
-];
-
 export default function FeaturesSection() {
-  const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="features" className="relative py-32 md:py-48 px-6">
-      {/* Parallax accent */}
-      <div
-        className="absolute top-1/3 right-0 w-[300px] h-[600px] opacity-[0.03]"
-        style={{
-          background:
-            "linear-gradient(180deg, transparent, rgba(255,107,43,0.5), transparent)",
-        }}
-      />
+    <section id="features" className="bg-[#FF5E00] py-24 md:py-32 border-b-8 border-black">
+      <div ref={ref} className="max-w-7xl mx-auto px-8 md:px-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Large feature card */}
+          <motion.div
+            className="md:col-span-8 bg-white border-8 border-black p-8 md:p-12 neo-shadow hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] transition-all"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="text-6xl mb-6 block">⚡</span>
+            <h3 className="font-black text-headline-lg uppercase mt-4 leading-tight text-black">
+              NANO-ENGINEERED<br />PRECISION
+            </h3>
+            <p className="text-body-lg text-black mt-4 max-w-lg font-medium">
+              EACH MOLECULE IS PRECISELY CALIBRATED FOR MAXIMUM ABSORPTION. OUR PROPRIETARY NANO-TECH ENSURES EVERY SIP DELIVERS COSMIC-LEVEL NUTRITION.
+            </p>
+          </motion.div>
 
-      <div ref={sectionRef} className="max-w-6xl mx-auto relative z-10">
-        <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <p className="text-xs uppercase tracking-[0.5em] text-neon-orange mb-4">
-            ◆ Why Nano Banana
-          </p>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-            Beyond{" "}
-            <span className="gradient-text-blue">Ordinary</span>
-          </h2>
-          <p className="text-gray-500 max-w-xl mx-auto text-lg font-light">
-            Not just juice. A quantum leap in beverage technology.
-          </p>
-        </motion.div>
+          {/* Side stat card */}
+          <motion.div
+            className="md:col-span-4 bg-black text-white border-8 border-black p-8 md:p-12 neo-shadow-orange flex flex-col justify-between"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <span className="text-6xl mb-6 block">⚛️</span>
+            <div>
+              <h3 className="font-black text-headline-md uppercase mb-4 text-[#FF5E00]">SPACE-GRADE</h3>
+              <p className="text-body-md opacity-80 font-medium">
+                TESTED IN ZERO-GRAVITY ENVIRONMENTS. THE SAME FORMULA TRUSTED BY ASTRONAUTS.
+              </p>
+            </div>
+            <div className="mt-8 border-t-4 border-white pt-6">
+              <span className="font-black text-5xl">10B+</span>
+              <div className="font-bold uppercase text-sm text-[#FF5E00] mt-1">NANO-PARTICLES</div>
+            </div>
+          </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {features.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 60, scale: 0.95 }}
-              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{
-                duration: 0.8,
-                delay: i * 0.12,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="glass rounded-2xl p-8 md:p-10 group hover:border-white/15 transition-all duration-500 relative overflow-hidden"
-            >
-              {/* Hover gradient */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                style={{
-                  background: "radial-gradient(ellipse at top left, rgba(0,212,255,0.03) 0%, transparent 60%)"
-                }}
-              />
+          {/* Bottom row */}
+          <motion.div
+            className="md:col-span-4 bg-black text-white border-8 border-black p-8 neo-shadow -rotate-1 hover:rotate-0 transition-all"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h4 className="font-black text-headline-md uppercase text-[#FF5E00] mb-4">BIO-ADAPTIVE</h4>
+            <p className="text-body-md opacity-80 font-medium">
+              OUR AI-DRIVEN MOLECULAR STRUCTURE ADAPTS TO YOUR BODY&apos;S UNIQUE HYDRATION NEEDS.
+            </p>
+            <div className="mt-6 flex gap-2">
+              <div className="w-8 h-8 bg-white border-2 border-white"></div>
+              <div className="w-8 h-8 bg-[#FF5E00] border-2 border-white"></div>
+              <div className="w-8 h-8 bg-black border-2 border-white"></div>
+            </div>
+          </motion.div>
 
-              <div className="relative z-10">
-                <div className="text-4xl mb-5">{feature.icon}</div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-400 leading-relaxed font-light">
-                  {feature.description}
-                </p>
+          <motion.div
+            className="md:col-span-4 bg-white border-8 border-black p-8 flex items-center justify-center"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="text-center">
+              <div className="text-[80px] font-black text-black leading-none">10×</div>
+              <div className="font-bold uppercase text-[#FF5E00] border-t-4 border-black pt-2 mt-2 tracking-widest text-sm">
+                FASTER HYDRATION
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="md:col-span-4 bg-white border-8 border-black p-8 neo-shadow"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <span className="text-6xl mb-4 block">🧬</span>
+            <h4 className="font-black text-xl uppercase mb-2">QUANTUM NUTRITION</h4>
+            <p className="text-body-md opacity-70 font-medium">
+              PERSONALIZED AT THE MOLECULAR LEVEL. EVERY DROP CALIBRATED TO YOU.
+            </p>
+          </motion.div>
         </div>
       </div>
     </section>

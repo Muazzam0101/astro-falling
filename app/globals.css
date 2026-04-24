@@ -2,18 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-primary: #050508;
-  --bg-secondary: #0a0a10;
-  --bg-card: rgba(16, 16, 26, 0.6);
-  --neon-blue: #00d4ff;
-  --neon-orange: #ff6b2b;
-  --text-primary: #f0f0f5;
-  --text-secondary: #888899;
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -25,118 +13,79 @@ html {
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-outfit), sans-serif;
+  background-color: #fff8f6;
+  color: #271812;
+  font-family: var(--font-epilogue), "Epilogue", sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: var(--neon-orange);
+  background: #ff5e00;
   color: white;
 }
 
-::-moz-selection {
-  background: var(--neon-orange);
-  color: white;
+/* Dot grid background */
+.dot-grid {
+  background-image: radial-gradient(#000 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Neo-Brutalist shadows */
+.neo-shadow {
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.neo-shadow-orange {
+  box-shadow: 8px 8px 0px 0px #ff5e00;
+}
+
+.neo-shadow-white {
+  box-shadow: 8px 8px 0px 0px #ffffff;
+}
+
+.neo-shadow-lg {
+  box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.neo-shadow-sm {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+}
+
+/* Interactive states */
+.neo-hover:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.neo-active:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 1);
 }
 
 /* Minimal scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: #fff8f6;
+  border-left: 4px solid black;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background: #ff5e00;
+  border: 2px solid black;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #a63b00;
 }
 
-/* Glassmorphism utility */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Gradient text utility */
-.gradient-text-blue {
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-orange {
-  background: linear-gradient(135deg, #ff6b2b, #ff9a5c);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-mixed {
-  background: linear-gradient(135deg, #00d4ff 0%, #ff6b2b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Noise overlay for texture */
-.noise::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.4;
-}
-
-/* Glow effects */
-.glow-blue {
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.15),
-    0 0 60px rgba(0, 212, 255, 0.05);
-}
-
-.glow-orange {
-  box-shadow: 0 0 30px rgba(255, 107, 43, 0.15),
-    0 0 60px rgba(255, 107, 43, 0.05);
-}
-
-.glow-mixed {
-  box-shadow: 0 0 40px rgba(0, 212, 255, 0.1),
-    0 0 80px rgba(255, 107, 43, 0.08);
-}
-
-/* Text shadow glow */
-.text-glow-blue {
-  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5),
-    0 0 40px rgba(0, 212, 255, 0.2);
-}
-
-.text-glow-orange {
-  text-shadow: 0 0 20px rgba(255, 107, 43, 0.5),
-    0 0 40px rgba(255, 107, 43, 0.2);
+/* Border utilities */
+.border-mega {
+  border-width: 8px;
+  border-color: black;
 }
 
 @layer utilities {

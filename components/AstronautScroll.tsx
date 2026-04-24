@@ -19,13 +19,12 @@ export default function AstronautScroll() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Preload images in batches for performance
+  // Preload images in batches
   useEffect(() => {
     let cancelled = false;
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
     let loadedCount = 0;
 
-    // Load every 3rd frame first for quick preview, then fill in gaps
     const priorityFrames: number[] = [];
     for (let i = 1; i <= TOTAL_FRAMES; i += 3) priorityFrames.push(i);
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
@@ -47,7 +46,6 @@ export default function AstronautScroll() {
           images[frameNum - 1] = img;
           loadedCount++;
           setLoadingProgress(Math.round((loadedCount / TOTAL_FRAMES) * 100));
-
           if (loadedCount === TOTAL_FRAMES) {
             imagesRef.current = images;
             setIsLoaded(true);
@@ -68,13 +66,9 @@ export default function AstronautScroll() {
     }
 
     loadBatch(0);
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  // Draw frame to canvas
   const drawFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -83,53 +77,28 @@ export default function AstronautScroll() {
 
     const img = imagesRef.current[frameIndex];
     if (!img) {
-      // Find nearest loaded frame
       let nearest = frameIndex;
       for (let d = 1; d < 20; d++) {
-        if (imagesRef.current[frameIndex - d]) {
-          nearest = frameIndex - d;
-          break;
-        }
-        if (imagesRef.current[frameIndex + d]) {
-          nearest = frameIndex + d;
-          break;
-        }
+        if (imagesRef.current[frameIndex - d]) { nearest = frameIndex - d; break; }
+        if (imagesRef.current[frameIndex + d]) { nearest = frameIndex + d; break; }
       }
       const fallback = imagesRef.current[nearest];
       if (!fallback) return;
       drawImageCover(ctx, fallback, canvas.width, canvas.height);
       return;
     }
-
     drawImageCover(ctx, img, canvas.width, canvas.height);
   }, []);
 
-  // Draw image with cover behavior
-  function drawImageCover(
-    ctx: CanvasRenderingContext2D,
-    img: HTMLImageElement,
-    cw: number,
-    ch: number
-  ) {
+  function drawImageCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, cw: number, ch: number) {
     const imgRatio = img.width / img.height;
     const canvasRatio = cw / ch;
-    let sx = 0,
-      sy = 0,
-      sw = img.width,
-      sh = img.height;
-
-    if (imgRatio > canvasRatio) {
-      sw = img.height * canvasRatio;
-      sx = (img.width - sw) / 2;
-    } else {
-      sh = img.width / canvasRatio;
-      sy = (img.height - sh) / 2;
-    }
-
+    let sx = 0, sy = 0, sw = img.width, sh = img.height;
+    if (imgRatio > canvasRatio) { sw = img.height * canvasRatio; sx = (img.width - sw) / 2; }
+    else { sh = img.width / canvasRatio; sy = (img.height - sh) / 2; }
     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
   }
 
-  // Resize canvas
   useEffect(() => {
     function resize() {
       const canvas = canvasRef.current;
@@ -139,22 +108,16 @@ export default function AstronautScroll() {
       canvas.height = window.innerHeight * dpr;
       canvas.style.width = "100%";
       canvas.style.height = "100%";
-
-      if (imagesRef.current.length > 0) {
-        drawFrame(currentFrameRef.current);
-      }
+      if (imagesRef.current.length > 0) drawFrame(currentFrameRef.current);
     }
-
     resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, [drawFrame]);
 
-  // Main scroll handler
   useEffect(() => {
     function onScroll() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
       rafRef.current = requestAnimationFrame(() => {
         const section = sectionRef.current;
         const card = cardRef.current;
@@ -165,74 +128,62 @@ export default function AstronautScroll() {
         const scrolled = -rect.top;
         const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
 
-        // Map progress to frame
-        const frameIndex = Math.min(
-          Math.floor(progress * (TOTAL_FRAMES - 1)),
-          TOTAL_FRAMES - 1
-        );
+        const frameIndex = Math.min(Math.floor(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1);
         if (frameIndex !== currentFrameRef.current) {
           currentFrameRef.current = frameIndex;
           drawFrame(frameIndex);
         }
 
-        // Card transformation with eased progress
         const eased = easeInOutCubic(progress);
-
-        // Scale: 0.45 -> 1.0
         const scale = 0.45 + eased * 0.55;
-
-        // Border radius: 24px -> 0px
-        const borderRadius = Math.max(0, 24 * (1 - eased));
-
-        // Glow opacity: visible when small, fades as fullscreen
-        const glowOpacity = Math.max(0, 1 - eased * 2);
+        const borderWidth = Math.max(0, 8 * (1 - eased));
+        const shadowSize = Math.max(0, 12 * (1 - eased));
 
         card.style.transform = `scale(${scale})`;
-        card.style.borderRadius = `${borderRadius}px`;
-
-        // Update glow
-        const glowEl = card.querySelector(".card-glow") as HTMLElement;
-        if (glowEl) {
-          glowEl.style.opacity = String(glowOpacity);
-        }
+        card.style.borderWidth = `${borderWidth}px`;
+        card.style.boxShadow = shadowSize > 0
+          ? `${shadowSize}px ${shadowSize}px 0px 0px #FF5E00`
+          : "none";
       });
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // initial call
+    onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [drawFrame]);
 
-  // Draw first frame when loaded
   useEffect(() => {
-    if (isLoaded) {
-      drawFrame(0);
-    }
+    if (isLoaded) drawFrame(0);
   }, [isLoaded, drawFrame]);
 
   return (
     <section
       ref={sectionRef}
       id="astronaut-scroll"
-      className="relative"
+      className="relative bg-black border-b-8 border-black"
       style={{ height: "500vh" }}
     >
+      {/* Section title sticker */}
+      <div className="absolute top-8 left-8 z-20 bg-[#FF5E00] text-black px-6 py-3 border-4 border-black font-black text-xl uppercase -rotate-2 neo-shadow">
+        ASTRONAUT EXPERIENCE
+      </div>
+
       {/* Sticky container */}
-      <div className="sticky top-0 w-screen h-screen flex items-center justify-center overflow-hidden">
-        {/* Loading overlay */}
+      <div className="sticky top-0 w-screen h-screen flex items-center justify-center overflow-hidden bg-black">
+        {/* Loading */}
         {!isLoaded && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-surface-900">
-            <div className="relative w-48 h-1 bg-white/5 rounded-full overflow-hidden mb-4">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black">
+            <div className="w-64 border-4 border-white p-1 mb-4">
               <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-neon-blue to-neon-orange rounded-full transition-all duration-300"
+                className="h-4 bg-[#FF5E00] transition-all duration-300"
                 style={{ width: `${loadingProgress}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 uppercase tracking-[0.3em]">
-              Loading Experience — {loadingProgress}%
+            <p className="text-white font-black uppercase tracking-[0.3em] text-sm">
+              LOADING — {loadingProgress}%
             </p>
           </div>
         )}
@@ -245,36 +196,17 @@ export default function AstronautScroll() {
             width: "100vw",
             height: "100vh",
             transform: "scale(0.45)",
-            borderRadius: "24px",
+            borderStyle: "solid",
+            borderColor: "black",
+            borderWidth: "8px",
+            boxShadow: "12px 12px 0px 0px #FF5E00",
             transformOrigin: "center center",
           }}
         >
-          {/* Glow effect behind card */}
-          <div
-            className="card-glow absolute -inset-4 rounded-3xl pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(0,212,255,0.15) 0%, rgba(255,107,43,0.15) 100%)",
-              filter: "blur(40px)",
-              opacity: 1,
-              transition: "opacity 0.1s",
-            }}
-          />
-
-          {/* Canvas */}
           <canvas
             ref={canvasRef}
             className="absolute inset-0 w-full h-full"
             style={{ display: "block" }}
-          />
-
-          {/* Subtle vignette */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, transparent 50%, rgba(5,5,8,0.4) 100%)",
-            }}
           />
         </div>
       </div>
